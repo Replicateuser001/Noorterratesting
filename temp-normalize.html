@@ -1,0 +1,45 @@
+<![CDATA[<!DOCTYPE html>
+<html>
+<head>
+    <title>Normalize Test Results</title>
+</head>
+<body>
+    <pre id="output"></pre>
+    <script>
+        function normalizeTestResults() {
+            const results = JSON.parse(localStorage.getItem('testResults') || '[]');
+            const output = document.getElementById('output');
+            
+            output.textContent = 'Original Data:\n' + JSON.stringify(results, null, 2);
+            
+            // Normalize the results
+            const normalizedResults = results.map(result => {
+                // Check if this is an old format result (has scores > 1)
+                const needsNormalization = Object.values(result.skillScores).some(score => score > 1);
+                
+                if (needsNormalization) {
+                    const normalized = {
+                        ...result,
+                        skillScores: Object.fromEntries(
+                            Object.entries(result.skillScores).map(([skill, score]) => [
+                                skill,
+                                score > 1 ? score / 100 : score
+                            ])
+                        )
+                    };
+                    return normalized;
+                }
+                return result;
+            });
+            
+            output.textContent += '\n\nNormalized Data:\n' + JSON.stringify(normalizedResults, null, 2);
+            
+            // Save normalized results
+            localStorage.setItem('testResults', JSON.stringify(normalizedResults));
+            output.textContent += '\n\nData has been normalized and saved!';
+        }
+        
+        normalizeTestResults();
+    </script>
+</body>
+</html>]]>
